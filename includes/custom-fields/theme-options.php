@@ -23,8 +23,8 @@ Container::make('theme_options', 'Social Links')
 
 // Add third options page under "Appearance"
 Container::make('theme_options', 'Customize Background')
-         ->set_page_parent('includes/custom-fields/theme-options.php')
-         ->add_fields(array(
+			->set_page_parent('themes.php')
+            ->add_fields(array(
 		Field::make('color', 'crb_background_color'),
 		Field::make('image', 'crb_background_image')
 	));
