@@ -1,7 +1,6 @@
 <?php
 /**
- * Enqueue all styles and scripts
- *
+ * Enqueue all styles
  */
 if ( ! function_exists( 'ast_scripts' ) ) :
 	add_action( 'wp_enqueue_scripts', 'ast_scripts' );
@@ -13,6 +12,9 @@ if ( ! function_exists( 'ast_scripts' ) ) :
 	}
 
 endif;
+/**
+ * Enqueue all scripts
+ */
 if ( ! function_exists( 'ast_styles' ) ) :
 	add_action( 'wp_enqueue_scripts', 'ast_styles' );
 	function ast_styles() {

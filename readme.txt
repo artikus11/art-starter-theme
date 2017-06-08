@@ -13,7 +13,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Стартовая тема для удобной разработки. Собрана на основе underscores.me и включает в себя поддержку Woocommerce и другие плюшки
+Стартовая тема для удобной разработки. Собрана на основе underscores.me и FoundationPress. Включает в себя поддержку Woocommerce и другие плюшки
 
 == Installation ==
 

@@ -1,9 +1,7 @@
 <?php
 
 if ( ! function_exists( 'ast_posted_on' ) ) :
-	/**
-	 * Prints HTML with meta information for the current post-date/time and author.
-	 */
+
 	function ast_posted_on() {
 		$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
 		if ( get_the_time( 'U' ) !== get_the_modified_time( 'U' ) ) {
@@ -33,9 +31,7 @@ if ( ! function_exists( 'ast_posted_on' ) ) :
 endif;
 
 if ( ! function_exists( 'ast_entry_footer' ) ) :
-	/**
-	 * Prints HTML with meta information for the categories, tags and comments.
-	 */
+
 	function ast_entry_footer() {
 		// Hide category and tag text for pages.
 		if ( 'post' === get_post_type() ) {
@@ -54,7 +50,7 @@ if ( ! function_exists( 'ast_entry_footer' ) ) :
 		
 		if ( ! is_single() && ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
 			echo '<span class="comments-link">';
-			comments_popup_link( esc_html__( 'Leave a comment', 'art-starter-theme' ), esc_html__( '1 Comment', 'af-tf' ), esc_html__( '% Comments', 'art-starter-theme' ) );
+			comments_popup_link( esc_html__( 'Leave a comment', 'art-starter-theme' ), esc_html__( '1 Comment', 'art-starter-theme' ), esc_html__( '% Comments', 'art-starter-theme' ) );
 			echo '</span>';
 		}
 		

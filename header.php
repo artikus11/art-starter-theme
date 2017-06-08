@@ -10,9 +10,8 @@
 </head>
 
 <body <?php body_class(); ?>>
-<div id="page" class="hfeed site">
-	<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'af-tf' ); ?></a>
-	
+<div id="page" class="site">
+
 	<header id="header" class="header" role="banner">
 		<div class="branding">
 			<?php if ( is_front_page() && is_home() ) : ?>
@@ -24,8 +23,7 @@
 		</div><!-- .site-branding -->
 		
 		<nav id="site-navigation" class="main-navigation" role="navigation">
-			<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', 'af-tf' ); ?></button>
-			<?php wp_nav_menu( array( 'theme_location' => 'primary', 'menu_id' => 'primary-menu' ) ); ?>
+			<?php ast_primary_menu(); ?>
 		</nav><!-- #site-navigation -->
 	</header><!-- #header -->
 	
