@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 
-// Default options page
+/*// Default options page
 Container::make('theme_options', 'Настройки темы')
          ->add_fields(array(
 	         Field::make('header_scripts', 'crb_header_script'),
@@ -27,4 +27,4 @@ Container::make('theme_options', 'Customize Background')
          ->add_fields(array(
 		Field::make('color', 'crb_background_color'),
 		Field::make('image', 'crb_background_image')
-	));
+	));*/
