@@ -2,7 +2,6 @@
 
 namespace Carbon_Fields\Datastore;
 
-use Carbon_Fields\Helper\Helper;
 use Carbon_Fields\Exception\Incorrect_Syntax_Exception;
 
 /**
@@ -10,17 +9,9 @@ use Carbon_Fields\Exception\Incorrect_Syntax_Exception;
  * Defines the key datastore methods and their default implementations.
  */
 abstract class Datastore implements Datastore_Interface {
-
-	/**
-	 * The related object id
-	 * 
-	 * @var integer
-	 */
-	protected $object_id = 0;
-
 	/**
 	 * Initialize the datastore.
-	 */
+	 **/
 	public function __construct() {
 		$this->init();
 	}
@@ -29,53 +20,35 @@ abstract class Datastore implements Datastore_Interface {
 	 * Initialization tasks for concrete datastores.
 	 *
 	 * @abstract
-	 */
+	 **/
 	abstract public function init();
-	
-	/**
-	 * Get the related object id
-	 *
-	 * @return integer
-	 */
-	public function get_object_id() {
-		return $this->object_id;
-	}
 
 	/**
-	 * Set the related object id
+	 * Create a new datastore of type $type.
 	 *
-	 * @param  integer $object_id
-	 */
-	public function set_object_id( $object_id ) {
-		$this->object_id = $object_id;
-	}
+	 * @param string $type
+	 * @return Datastore $datastore
+	 **/
+	public static function factory( $type ) {
+		$type = str_replace( ' ', '_', ucwords( str_replace( '_', ' ', $type ) ) );
 
-	/**
-	 * Create a new datastore of type $raw_type.
-	 *
-	 * @param string $raw_type
-	 * @return Datastore_Interface
-	 */
-	public static function factory( $raw_type ) {
-		$type = Helper::normalize_type( $raw_type );
-		$class = Helper::type_to_class( $type, __NAMESPACE__, '_Datastore' );
+		$class = __NAMESPACE__ . '\\' . $type . '_Datastore';
+
 		if ( ! class_exists( $class ) ) {
-			Incorrect_Syntax_Exception::raise( 'Unknown datastore type "' . $raw_type . '".' );
-			return null;
+			Incorrect_Syntax_Exception::raise( 'Unknown datastore type "' . $type . '".' );
 		}
 
-		$datastore = new $class();
+		$field = new $class();
 
-		return $datastore;
+		return $field;
 	}
 
 	/**
 	 * An alias of factory().
 	 *
 	 * @see Datastore::factory()
-	 * @return Datastore_Interface
-	 */
+	 **/
 	public static function make( $type ) {
-		return static::factory( $type );
+		return self::factory( $type );
 	}
 }

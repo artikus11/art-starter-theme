@@ -8,9 +8,25 @@ namespace Carbon_Fields\Libraries\Sidebar_Manager;
 class Sidebar_Manager {
 
 	/**
+	 * Singleton implementation.
+	 *
+	 * @return Sidebar_Manager
+	 */
+	public static function instance() {
+		// Store the instance locally to avoid private static replication.
+		static $instance;
+
+		if ( ! is_a( $instance, 'Sidebar_Manager' ) ) {
+			$instance = new Sidebar_Manager;
+			$instance->setup();
+		}
+		return $instance;
+	}
+
+	/**
 	 * Register actions, filters, etc...
 	 */
-	public function boot() {
+	private function setup() {
 		// Register the custom sidebars
 		add_action( 'widgets_init', array( $this, 'register_sidebars' ), 100 );
 
@@ -19,68 +35,54 @@ class Sidebar_Manager {
 
 		// Set the default options
 		if ( function_exists( 'crb_get_default_sidebar_options' ) ) {
-			add_filter( 'carbon_fields_sidebar_default_options', 'crb_get_default_sidebar_options', -1 );
+			add_filter( 'carbon_custom_sidebar_default_options', 'crb_get_default_sidebar_options', -1 );
 		}
 
 		// Ajax listeners
-		add_action( 'wp_ajax_carbon_fields_add_sidebar', array( $this, 'action_handler' ) );
-		add_action( 'wp_ajax_carbon_fields_remove_sidebar', array( $this, 'action_handler' ) );
+		add_action( 'wp_ajax_carbon_add_sidebar', array( $this, 'action_handler' ) );
+		add_action( 'wp_ajax_carbon_remove_sidebar', array( $this, 'action_handler' ) );
 	}
 
 	/**
 	 * Handle action requests.
+	 *
+	 * @return array|void Output JSON if DOING_AJAX, otherwise return an array
 	 */
 	public function action_handler() {
 		$response = array(
 			'success' => false,
 			'error' => null,
-			'errorCode' => null,
-			'data' => null,
 		);
 
-		$input = stripslashes_deep( $_POST );
-		$action = isset( $input['action'] ) ? $input['action'] : '';
-		
-		$result = $this->execute_action( $action, $input );
+		if ( empty( $_POST['action'] ) || empty( $_POST['name'] ) ) {
+			return false;
+		}
+
+		$action = $_POST['action'];
+		$name = $_POST['name'];
+		$result = false;
+
+		switch ( $action ) {
+			case 'carbon_add_sidebar':
+				$result = $this->add_sidebar( $name );
+			break;
+
+			case 'carbon_remove_sidebar':
+				$result = $this->remove_sidebar( $name );
+			break;
+		}
 
 		if ( is_wp_error( $result ) ) {
-			$response['success'] = false;
 			$response['error'] = $result->get_error_message();
-			$response['errorCode'] = $result->get_error_code();
 		} else {
-			$response['success'] = true;
-			$response['data'] = $result;
+			$response['success'] = (bool) $result;
 		}
 
-		wp_send_json( $response );
-		exit;
-	}
-
-	/**
-	 * Execute an action
-	 *
-	 * @param string $action
-	 * @param array $input
-	 * @return mixed
-	 */
-	public function execute_action( $action, $input ) {
-		$name = isset( $input['name'] ) ? $input['name'] : '';
-		if ( empty( $name ) ) {
-			return new \WP_Error( 'name-missing', __( 'Please pass a name for the sidebar.', 'carbon-fields' ) );
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			wp_send_json( $response );
+		} else {
+			return $response;
 		}
-
-		$result = new \WP_Error( 'unknown-action', __( 'Unknown action attempted.', 'carbon-fields' ) );
-		switch ( $action ) {
-			case 'carbon_fields_add_sidebar':
-				$result = $this->add_sidebar( $name );
-				break;
-
-			case 'carbon_fields_remove_sidebar':
-				$result = $this->remove_sidebar( $name );
-				break;
-		}
-
-		return $result;
 	}
 
 	/**
@@ -107,15 +109,7 @@ class Sidebar_Manager {
 			'name' => $name,
 		);
 
-		$success = update_option( 'carbon_custom_sidebars', $registered_sidebars );
-		if ( ! $success ) {
-			return new \WP_Error( 'update-failed', __( 'Failed to update option storing your custom sidebars. Please contact support.', 'carbon-fields' ) );
-		}
-
-		return array(
-			'id' => $id,
-			'name' => $name,
-		);
+		return update_option( 'carbon_custom_sidebars', $registered_sidebars );
 	}
 
 	/**
@@ -137,12 +131,7 @@ class Sidebar_Manager {
 			return new \WP_Error( 'sidebar-not-found', __( 'Sidebar not found.', 'carbon-fields' ) );
 		}
 
-		$success = update_option( 'carbon_custom_sidebars', $registered_sidebars );
-		if ( ! $success ) {
-			return new \WP_Error( 'update-failed', __( 'Failed to update option storing your custom sidebars. Please contact support.', 'carbon-fields' ) );
-		}
-
-		return $success;
+		return update_option( 'carbon_custom_sidebars', $registered_sidebars );
 	}
 
 	/**
@@ -151,7 +140,7 @@ class Sidebar_Manager {
 	 * @return array
 	 */
 	public function get_sidebars() {
-		return apply_filters( 'carbon_fields_sidebars', get_option( 'carbon_custom_sidebars', array() ) );
+		return apply_filters( 'carbon_custom_sidebars', get_option( 'carbon_custom_sidebars', array() ) );
 	}
 
 	/**
@@ -159,12 +148,12 @@ class Sidebar_Manager {
 	 */
 	public function register_sidebars() {
 		$registered_sidebars = $this->get_sidebars();
-		$default_options = apply_filters( 'carbon_fields_sidebar_default_options', array() );
+		$default_options = apply_filters( 'carbon_custom_sidebar_default_options', array() );
 
 		foreach ( $registered_sidebars as $id => $options ) {
 			$options['class'] = 'carbon-sidebar';
 			$options = wp_parse_args( $options, $default_options );
-			$options = apply_filters( 'carbon_fields_sidebar_options', $options, $id );
+			$options = apply_filters( 'carbon_custom_sidebar_options', $options, $id );
 
 			register_sidebar( $options );
 		}

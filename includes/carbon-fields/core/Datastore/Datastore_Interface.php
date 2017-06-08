@@ -8,40 +8,38 @@ use Carbon_Fields\Field\Field;
  * Interface for data storage management.
  */
 interface Datastore_Interface {
-
 	/**
-	 * Get the related object id
+	 * Load the field value(s) from the database.
 	 *
-	 * @return integer
-	 */
-	public function get_object_id();
-
-	/**
-	 * Set the related object id
-	 *
-	 * @param integer $object_id
-	 */
-	public function set_object_id( $object_id );
-
-	/**
-	 * Load the field value(s)
-	 *
-	 * @param  Field $field The field to load value(s) in.
-	 * @return array
+	 * @param Field $field The field to retrieve value for.
 	 */
 	public function load( Field $field );
 
 	/**
-	 * Save the field value(s)
+	 * Save the field value(s) into the database.
 	 *
 	 * @param Field $field The field to save.
 	 */
 	public function save( Field $field );
 
 	/**
-	 * Delete the field value(s)
+	 * Delete the field value(s) from the database.
 	 *
 	 * @param Field $field The field to delete.
 	 */
 	public function delete( Field $field );
+
+	/**
+	 * Load complex field value(s) from the database.
+	 *
+	 * @param mixed $field The field to load values for.
+	 */
+	public function load_values( $field );
+
+	/**
+	 * Delete complex field value(s) from the database.
+	 *
+	 * @param mixed $field The field to delete values for.
+	 */
+	public function delete_values( $field );
 }

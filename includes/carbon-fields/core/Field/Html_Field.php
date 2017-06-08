@@ -7,13 +7,7 @@ namespace Carbon_Fields\Field;
  * Allows to create a field that displays any HTML in a container.
  */
 class Html_Field extends Field {
-
-	/**
-	 * HTML contents to display
-	 * 
-	 * @var string
-	 */
-	public $field_html = '';
+	public $field_html;
 
 	/**
 	 * Set the field HTML or callback that returns the HTML.
@@ -31,6 +25,7 @@ class Html_Field extends Field {
 
 	/**
 	 * Returns an array that holds the field data, suitable for JSON representation.
+	 * This data will be available in the Underscore template and the Backbone Model.
 	 *
 	 * @param bool $load  Should the value be loaded from the database or use the value from the current instance.
 	 * @return array
@@ -43,6 +38,15 @@ class Html_Field extends Field {
 		) );
 
 		return $field_data;
+	}
+
+	/**
+	 * Underscore template of this field
+	 */
+	public function template() {
+		?>
+		{{{ html }}}
+		<?php
 	}
 
 	/**

@@ -2,17 +2,10 @@
 
 namespace Carbon_Fields\Field;
 
-use Carbon_Fields\Helper\Helper;
 use Carbon_Fields\Datastore\Datastore_Interface;
 use Carbon_Fields\Exception\Incorrect_Syntax_Exception;
 
 class Group_Field {
-
-	/**
-	 * Default name to use for groups which have no name defined by the user
-	 */
-	const DEFAULT_GROUP_NAME = '_';
-
 	/**
 	 * Unique group identificator. Generated randomly.
 	 *
@@ -35,7 +28,7 @@ class Group_Field {
 	protected $label;
 
 	/**
-	 * Group label template.
+	 * Group label underscore template.
 	 *
 	 * @var string
 	 */
@@ -51,7 +44,7 @@ class Group_Field {
 	/**
 	 * List of registered unique field names
 	 *
-	 * @see register_field_name()
+	 * @see verify_unique_field_name()
 	 * @var array
 	 */
 	protected $registered_field_names = array();
@@ -85,7 +78,12 @@ class Group_Field {
 				Incorrect_Syntax_Exception::raise( 'Object must be of type ' . __NAMESPACE__ . '\\Field' );
 			}
 
-			$this->register_field_name( $field->get_name() );
+			// verify name validity
+			if ( preg_match( '~_\d+~', $field->get_name() ) ) {
+				Incorrect_Syntax_Exception::raise( 'Subfield names cannot contain underscore followed by a digit(s). Replace "' . ltrim( $field->get_name(), '_' ) . '" with "' . ltrim( preg_replace( '~_+(\d+)~', '$1', $field->get_name() ), '_' ) . '"' );
+			}
+
+			$this->verify_unique_field_name( $field->get_name() );
 		}
 
 		$this->fields = array_merge( $this->fields, $fields );
@@ -117,6 +115,7 @@ class Group_Field {
 
 	/**
 	 * Returns an array that holds the field data, suitable for JSON representation.
+	 * This data will be available in the Underscore template and the Backbone Model.
 	 *
 	 * @param bool $load  Should the value be loaded from the database or use the value from the current instance.
 	 * @return array
@@ -125,6 +124,13 @@ class Group_Field {
 		$fields_data = array();
 
 		foreach ( $this->get_fields() as $field ) {
+			// The field default value should be set manually if the field is not loaded
+			if ( ! $load ) {
+				if ( $field->get_value() === null ) {
+					$field->set_value( $field->get_default_value() );
+				}
+			}
+
 			$fields_data[] = $field->to_json( $load );
 		}
 
@@ -132,7 +138,6 @@ class Group_Field {
 			'group_id' => $this->get_group_id(),
 			'name' => $this->get_name(),
 			'label' => $this->get_label(),
-			'label_template' => $this->get_label_template(),
 			'fields' => $fields_data,
 		);
 
@@ -154,9 +159,16 @@ class Group_Field {
 	 * @param string $label If null, the label will be generated from the group name
 	 */
 	public function set_label( $label ) {
+		// Try to guess field label from it's name
 		if ( is_null( $label ) ) {
-			// Try to guess field label from it's name
-			$label = Helper::normalize_label( $this->get_name() );
+			// remove the leading underscore(if it's there)
+			$label = preg_replace( '~^_~', '', $this->name );
+
+			// remove the leading "crb_"(if it's there)
+			$label = preg_replace( '~^crb_~', '', $label );
+
+			// split the name into words and make them capitalized
+			$label = ucwords( str_replace( '_', ' ', $label ) );
 		}
 
 		$this->label = $label;
@@ -172,7 +184,7 @@ class Group_Field {
 	}
 
 	/**
-	 * Set the label template.
+	 * Set the Underscore label template.
 	 *
 	 * @param string $template
 	 */
@@ -181,7 +193,7 @@ class Group_Field {
 	}
 
 	/**
-	 * Get the label template.
+	 * Set the Underscore label template.
 	 *
 	 * @return string
 	 */
@@ -190,7 +202,7 @@ class Group_Field {
 	}
 
 	/**
-	 * Print the label template.
+	 * Print the label Underscore template.
 	 */
 	public function template_label() {
 		echo $this->label_template;
@@ -202,13 +214,11 @@ class Group_Field {
 	 * @param string $name  Group name, either sanitized or not
 	 */
 	public function set_name( $name ) {
-		if ( ! $name ) {
-			$name = static::DEFAULT_GROUP_NAME;
-		}
-
-		$regex = '/\A[a-z0-9_]+\z/';
-		if ( ! preg_match( $regex, $name ) ) {
-			Incorrect_Syntax_Exception::raise( 'Group name can only contain lowercase alphanumeric characters and underscores.' );
+		$name = preg_replace( '~\s+~', '_', strtolower( $name ) );
+		if ( substr( $name, 0, 1 ) != '_' ) {
+			// add underscore to custom field name -- this will remove it from
+			// custom fields list in administration
+			$name = '_' . $name;
 		}
 
 		$this->name = $name;
@@ -226,8 +236,7 @@ class Group_Field {
 	/**
 	 * Assign a DataStore instance for all group fields.
 	 *
-	 * @param object  $datastore
-	 * @param boolean $set_as_default
+	 * @param object $datastore
 	 */
 	public function set_datastore( Datastore_Interface $datastore, $set_as_default = false ) {
 		foreach ( $this->fields as $field ) {
@@ -236,19 +245,27 @@ class Group_Field {
 	}
 
 	/**
+	 * Set a prefix for all group fields.
+	 *
+	 * @param string $prefix
+	 */
+	public function set_prefix( $prefix ) {
+		foreach ( $this->fields as $field ) {
+			$field->set_prefix( $prefix );
+		}
+	}
+
+	/**
 	 * Perform checks whether there is a field registered with the name $name.
 	 * If not, the field name is recorded.
 	 *
 	 * @param string $name
-	 * @return boolean
 	 */
-	public function register_field_name( $name ) {
+	public function verify_unique_field_name( $name ) {
 		if ( in_array( $name, $this->registered_field_names ) ) {
 			Incorrect_Syntax_Exception::raise( 'Field name "' . $name . '" already registered' );
-			return false;
 		}
 
 		$this->registered_field_names[] = $name;
-		return true;
 	}
 }

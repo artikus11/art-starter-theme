@@ -6,37 +6,30 @@ namespace Carbon_Fields\Field;
  * Color picker field class.
  */
 class Color_Field extends Field {
-
 	/**
-	 * Array of hex colors to show in the color picker
-	 * @var array<string>
+	 * Underscore template of the field.
 	 */
-	protected $palette = array();
+	public function template() {
+		?>
+		<div class="carbon-color">
+			<span class="pickcolor button carbon-color-button hide-if-no-js">
+				<span class="carbon-color-preview"></span>
 
-	/**
-	 * Set color presets
-	 *
-	 * @param array<string> $palette
-	 * @return Field $this
-	 */
-	public function set_palette( $palette ) {
-		$this->palette = $palette;
-		return $this;
+				<span class="carbon-color-button-text"><?php _e( 'Select a Color', 'carbon-fields' ); ?></span>
+			</span>
+
+			<input id="{{{ id }}}" type="text" name="{{{ name }}}" value="{{ value }}" class="regular-text carbon-color-field" />
+
+			<div class="carbon-color-container hide-if-no-js"></div>
+		</div>
+		<?php
 	}
 
 	/**
-	 * Returns an array that holds the field data, suitable for JSON representation.
-	 * 
-	 * @param bool $load  Should the value be loaded from the database or use the value from the current instance.
-	 * @return array
+	 * Hook administration scripts and styles.
 	 */
-	public function to_json( $load ) {
-		$field_data = parent::to_json( $load );
-
-		$field_data = array_merge( $field_data, array(
-			'palette' => $this->palette,
-		) );
-
-		return $field_data;
+	public static function admin_enqueue_scripts() {
+		wp_enqueue_style( 'wp-color-picker' );
+		wp_enqueue_script( 'iris' );
 	}
 }

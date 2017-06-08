@@ -2,11 +2,16 @@
 
 namespace Carbon_Fields\Field;
 
-use Carbon_Fields\Exception\Incorrect_Syntax_Exception;
-
 /**
  * Text field class.
  */
 class Text_Field extends Field {
-
+	/**
+	 * Underscore template of this field.
+	 */
+	public function template() {
+		?>
+		<input id="{{{ id }}}" type="text" name="{{{ name }}}" value="{{ value }}" class="regular-text" />
+		<?php
+	}
 }
