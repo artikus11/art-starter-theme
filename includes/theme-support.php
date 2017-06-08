@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 if ( ! function_exists( 'ast_theme_support' ) ) :
 	add_action( 'after_setup_theme', 'ast_theme_support' );
 	function ast_theme_support() {

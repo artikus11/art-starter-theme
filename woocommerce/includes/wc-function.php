@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 //Хлебные крошки
 if ( ! function_exists( 'ast_breadrumbs_yoast' ) ) {
 	add_action( 'woocommerce_before_main_content', 'ast_breadrumbs_yoast', 10 );
