@@ -13,10 +13,11 @@ require_once( 'includes/widget-areas.php' );
 require_once( 'includes/entry-meta.php' );
 
 /** Add Carbon Fields */
-require_once( 'includes/custom-nav.php' );
+require_once( 'includes/carbon-fields/carbon-fields-plugin.php' );
 
 
-add_action('carbon_register_fields', 'crb_register_custom_fields');
-function crb_register_custom_fields() {
-	include_once(dirname(__FILE__) . '/includes/post-meta.php');
+add_action('carbon_register_fields', 'ast_register_custom_fields');
+function ast_register_custom_fields() {
+	include_once(dirname(__FILE__) . '/includes/custom-fields/post-meta.php');
+	include_once(dirname(__FILE__) . '/includes/custom-fields/theme-options.php');
 }
