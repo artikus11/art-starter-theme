@@ -17,7 +17,7 @@ Container::make('theme_options', 'Настройки темы')
 Container::make('theme_options', 'Social Links')
          ->set_page_parent('Настройки темы')  // title of a top level Theme Options page
          ->add_fields(array(
-		Field::make('text', 'crb_facebook_link'),
+		Field::make('text', 'crb_facebook_link', 'попр'),
 		Field::make('text', 'crb_twitter_link')
 	));
 
