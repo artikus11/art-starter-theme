@@ -7,7 +7,7 @@ use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 
 // Default options page
-Container::make('theme_options', 'Настройки темы')
+Container::make('theme_options', 'basic option')
          ->add_fields(array(
 	         Field::make('header_scripts', 'crb_header_script'),
 	         Field::make('footer_scripts', 'crb_footer_script'),
